@@ -9,14 +9,14 @@ const sendMessage = async (req, res) => {
       return res.status(400).json({ message: "content and chatId required" });
     }
 
-    // Create message
+    
     let message = await Message.create({
       sender: req.user._id,
       content,
       chat: chatId
     });
 
-    // Populate sender & chat
+    
     message = await message.populate("sender", "username avatar");
     message = await message.populate({
   path: "chat",
@@ -25,12 +25,12 @@ const sendMessage = async (req, res) => {
 
 
 
-    // Update latest message in chat
+    
     await Chat.findByIdAndUpdate(chatId, {
       latestMessage: message._id
     });
 
-    // SOCKET EVENT
+    
      const chat = message.chat;
     chat.users.forEach((user) => {
       if (user._id.toString() === req.user._id.toString()) return;

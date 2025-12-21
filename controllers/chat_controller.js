@@ -1,10 +1,7 @@
 const Chat = require("../models/chat");
 const User = require("../models/user");
 
-/**
- * POST /api/chat
- * Access or create 1-to-1 chat
- */
+
 const accessChat = async (req, res) => {
   try {
     const { userId } = req.body; // ID of other user
@@ -13,7 +10,6 @@ const accessChat = async (req, res) => {
       return res.status(400).json({ message: "UserId is required" });
     }
 
-    // Check if chat already exists
     let chat = await Chat.findOne({
       isGroupChat: false,
       users: {
@@ -27,7 +23,6 @@ const accessChat = async (req, res) => {
       return res.status(200).json(chat);
     }
 
-    // Create new chat
     const newChat = await Chat.create({
       chatName: "sender",
       isGroupChat: false,
@@ -44,10 +39,7 @@ const accessChat = async (req, res) => {
   }
 };
 
-/**
- * GET /api/chat
- * Fetch all chats of logged-in user
- */
+
 const fetchChats = async (req, res) => {
   try {
     const chats = await Chat.find({

@@ -15,31 +15,17 @@ const updateProfile = async (req, res) => {
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found"
-      });
+      return res.status(404).json({ success: false });
     }
-
-    // avatar handling
-    let avatarUrl = user.avatar;
 
     if (req.file) {
       const result = await uploadcloudinary(req.file.path);
-      avatarUrl = result.secure_url;
-
-      try {
-        fs.unlinkSync(req.file.path);
-      } catch (err) {
-        console.warn("Temp file delete failed:", req.file.path);
-      }
+      user.avatar = result.secure_url;
     }
 
-    // update only existing schema fields
     user.username = username || user.username;
     user.phone = phone || user.phone;
     user.bio = bio || user.bio;
-    user.avatar = avatarUrl;
 
     await user.save();
 
@@ -47,36 +33,37 @@ const updateProfile = async (req, res) => {
     delete safeUser.hash;
     delete safeUser.salt;
 
-    res.status(200).json({
-      success: true,
-      user: safeUser
-    });
+    res.json({ success: true, user: safeUser });
   } catch (err) {
     console.error(err);
-    res.status(500).json({
-      success: false,
-      message: "Something went wrong"
-    });
+    res.status(500).json({ success: false });
   }
 };
 
 
+
 const searchUsers = async (req, res) => {
-  const keyword = req.query.query
-    ? {
-        $or: [
-          { username: { $regex: req.query.query, $options: "i" } },
-          { email: { $regex: req.query.query, $options: "i" } }
-        ]
-      }
-    : {};
+  try {
+    const keyword = req.query.query;
 
-  const users = await User.find(keyword)
-    .find({ _id: { $ne: req.user._id } })
-    .select("-hash -salt");
+    if (!keyword) {
+      return res.status(400).json({ message: "Search query required" });
+    }
 
-  res.status(200).json(users);
+    const users = await User.find({
+      $or: [
+        { username: { $regex: keyword, $options: "i" } },
+        { phone: { $regex: keyword, $options: "i" } }
+      ],
+      _id: { $ne: req.user._id } 
+    }).select("_id username avatar");
+
+    res.status(200).json(users);
+  } catch (err) {
+    res.status(500).json({ message: "Search failed" });
+  }
 };
+
 
 module.exports = {
   getMe,

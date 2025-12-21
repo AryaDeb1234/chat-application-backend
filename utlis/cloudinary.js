@@ -9,31 +9,22 @@ cloudinary.config({
   api_secret: process.env.cloudinary_api_secret,
 });
 
-const uploadoncloudinary = async (localfilepath) => {
-  if (!localfilepath) return null;
-
+const uploadcloudinary = async (filePath) => {
   try {
-    
-    const response = await cloudinary.uploader.upload(localfilepath, {
-      resource_type: "auto",
+    const result = await cloudinary.uploader.upload(filePath, {
+      folder: "avatars"
     });
 
-    console.log("File is uploaded on Cloudinary:", response.url);
+    // delete temp file AFTER upload
+    fs.unlink(filePath, () => {});
 
-    return response;
-  } catch (err) {
-    console.error("Cloudinary upload failed:", err.message);
-    return null;
-  } finally {
-
-    if (fs.existsSync(localfilepath)) {
-      fs.unlinkSync(localfilepath);
-    } else {
-      console.warn("Temp file not found for deletion:", localfilepath);
-    }
+    return result;
+  } catch (error) {
+    fs.unlink(filePath, () => {});
+    throw error;
   }
 };
 
 module.exports = {
-  uploadcloudinary: uploadoncloudinary,
+  uploadcloudinary: uploadcloudinary,
 };
