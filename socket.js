@@ -18,8 +18,8 @@ module.exports = (io) => {
     socket.on("disconnect", () => {
       console.log("Socket disconnected");
     });
-  });
-};
+  }); 
+}
 
 // module.exports = (io) => {
 //   const onlineUsers = {};
