@@ -56,7 +56,9 @@ function joinChat() {
   <div id="messages"></div>
 
   <script>
-    const socket = io("http://localhost:5000");
+    const socket = io("https://your-backend-name.onrender.com", {
+  transports: ["websocket"],
+});
 
     let currentUserId;
     let currentChatId;
