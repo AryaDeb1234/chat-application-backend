@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const userSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema(//first name,last name, (unique id), 
   {
     username: {
       type: String,
@@ -27,7 +27,11 @@ const userSchema = new mongoose.Schema(
     bio: {
       type: String,
       default: ""
-    }
+    },
+    contacts: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User"
+  }]
   },
   { timestamps: true }
 );

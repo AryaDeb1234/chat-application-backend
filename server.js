@@ -22,6 +22,7 @@ const authRouter = require("./routes/auth");
 const chatRouter = require("./routes/chat");
 const messageRouter = require("./routes/message");
 const userRouter = require("./routes/user");
+const statusRouter = require("./routes/status");
 
 
 app.use(cors());
@@ -73,6 +74,7 @@ app.use("/auth", authRouter);
 app.use("/chat", chatRouter);
 app.use("/message", messageRouter);
 app.use("/user", userRouter);
+app.use("/status", statusRouter);
 
 
 app.use((req, res) => {

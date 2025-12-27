@@ -1,7 +1,6 @@
 const Chat = require("../models/chat");
 const User = require("../models/user");
 
-
 const accessChat = async (req, res) => {
   try {
     const { userId } = req.body; // ID of other user
@@ -13,8 +12,8 @@ const accessChat = async (req, res) => {
     let chat = await Chat.findOne({
       isGroupChat: false,
       users: {
-        $all: [req.user._id, userId]
-      }
+        $all: [req.user._id, userId],
+      },
     })
       .populate("users", "-hash -salt")
       .populate("latestMessage");
@@ -26,11 +25,18 @@ const accessChat = async (req, res) => {
     const newChat = await Chat.create({
       chatName: "sender",
       isGroupChat: false,
-      users: [req.user._id, userId]
+      users: [req.user._id, userId],
     });
 
-    const fullChat = await Chat.findById(newChat._id)
-      .populate("users", "-hash -salt");
+    await User.updateMany(
+      { _id: { $in: [req.user._id, userId] } },
+      { $addToSet: { contacts: { $each: [req.user._id, userId] } } }
+    );
+
+    const fullChat = await Chat.findById(newChat._id).populate(
+      "users",
+      "-hash -salt"
+    );
 
     res.status(201).json(fullChat);
   } catch (err) {
@@ -39,11 +45,10 @@ const accessChat = async (req, res) => {
   }
 };
 
-
 const fetchChats = async (req, res) => {
   try {
     const chats = await Chat.find({
-      users: { $elemMatch: { $eq: req.user._id } }
+      users: { $elemMatch: { $eq: req.user._id } },
     })
       .populate("users", "-hash -salt")
       .populate("latestMessage")
@@ -58,5 +63,5 @@ const fetchChats = async (req, res) => {
 
 module.exports = {
   accessChat,
-  fetchChats
+  fetchChats,
 };
