@@ -10,7 +10,7 @@ const statusSchema = new mongoose.Schema(
 
     media: {
       type: String,
-      required: true,
+      required: true,   
     },
 
     caption: {

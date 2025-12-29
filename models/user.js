@@ -1,37 +1,45 @@
 const mongoose = require("mongoose");
 
-const userSchema = new mongoose.Schema(//first name,last name, (unique id), 
+const userSchema = new mongoose.Schema( //first name,last name, (unique id),
   {
     username: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
+    },
+
+    userCode: {
+      type: String,
+      unique: true,
+      index: true,
     },
 
     email: {
       type: String,
       unique: true,
-      lowercase: true
+      lowercase: true,
     },
 
-    phone:String,
+    phone: String,
 
     hash: String,
     salt: String,
 
     avatar: {
       type: String,
-      default: ""
+      default: "",
     },
 
     bio: {
       type: String,
-      default: ""
+      default: "",
     },
-    contacts: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User"
-  }]
+    contacts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   { timestamps: true }
 );

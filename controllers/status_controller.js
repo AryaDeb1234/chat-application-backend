@@ -20,18 +20,16 @@ const uploadStatus = async (req, res) => {
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
     });
 
- // fetch user's contacts
     const user = await User.findById(req.user._id).select("contacts");
 
-    //emit status event ONLY to contacts
-    user.contacts.forEach((contactId) => {
+        user.contacts.forEach((contactId) => {
       req.io.to(contactId.toString()).emit("new status", {
         userId: req.user._id,
         statusId: status._id,
       });
     });
 
-    // emit to self so uploader sees instantly
+    
     req.io.to(req.user._id.toString()).emit("new status", {
       userId: req.user._id,
       statusId: status._id,

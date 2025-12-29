@@ -2,6 +2,7 @@
 var passport = require("passport");
 var { genpassword, validpassword, issuejwt } = require("../lib/passwordutilis");
 var user = require("../models/user");
+const generateUserCode = require("../utlis/generateCode");
 
 async function login(req, res,next) {
   try {
@@ -52,45 +53,63 @@ async function register(req, res, next) {
   let { username, password } = req.body;
 
   try {
+    // 1️⃣ Check if username already exists
     let existuser = await user.findOne({ username });
-
     if (existuser) {
-      return res.status(400).json({ success: false, message: "User already exists. Please login." });
+      return res.status(400).json({
+        success: false,
+        message: "User already exists. Please login."
+      });
     }
 
+    // 2️⃣ Generate password hash
     let { salt, hash } = genpassword(password);
 
+    // 3️⃣ Generate UNIQUE 6-digit user code
+    let userCode;
+    let isUnique = false;
+
+    while (!isUnique) {
+      userCode = generateUserCode();
+      const codeExists = await user.findOne({ userCode });
+      if (!codeExists) isUnique = true;
+    }
+
+    // 4️⃣ Create new user
     let newuser = new user({
       username,
       hash,
-      salt
+      salt,
+      userCode
     });
 
     const saveduser = await newuser.save();
 
-    // Issue JWT on successful registration
+    // 5️⃣ Issue JWT
     const jwt = issuejwt(saveduser);
 
+    // 6️⃣ Respond
     res.status(201).json({
       success: true,
-      message: "Registration successful! You can now login.",
+      message: "Registration successful!",
       user: {
         id: saveduser._id,
         username: saveduser.username,
+        userCode: saveduser.userCode // 🔥 IMPORTANT
       },
       token: jwt.token,
       expires: jwt.expires
     });
 
   } catch (err) {
-   // console.error("Error during registration:", err);
+    console.error("Error during registration:", err);
     res.status(500).json({
       success: false,
       message: "Something went wrong. Please try again.",
-      error: err.message,
+      error: err.message
     });
   }
-};
+}
 
 function current_user(req, res) {
   // Send back user info if JWT is valid

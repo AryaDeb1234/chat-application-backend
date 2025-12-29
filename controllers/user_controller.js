@@ -44,25 +44,35 @@ const updateProfile = async (req, res) => {
 
 const searchUsers = async (req, res) => {
   try {
-    const keyword = req.query.query;
+    const userCode = req.query.code;
 
-    if (!keyword) {
-      return res.status(400).json({ message: "Search query required" });
+    if (!userCode) {
+      return res.status(400).json({
+        message: "User code required"
+      });
     }
 
-    const users = await User.find({
-      $or: [
-        { username: { $regex: keyword, $options: "i" } },
-        { phone: { $regex: keyword, $options: "i" } }
-      ],
-      _id: { $ne: req.user._id } 
-    }).select("_id username avatar");
+    const foundUser = await User.findOne({
+      userCode: userCode,
+      _id: { $ne: req.user._id }
+    }).select("_id username avatar userCode");
 
-    res.status(200).json(users);
+    if (!foundUser) {
+      return res.status(404).json({
+        message: "No user found with this code"
+      });
+    }
+
+    res.status(200).json(foundUser);
+
   } catch (err) {
-    res.status(500).json({ message: "Search failed" });
+    res.status(500).json({
+      message: "Search failed",
+      error: err.message
+    });
   }
 };
+
 
 
 module.exports = {
