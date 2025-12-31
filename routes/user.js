@@ -9,6 +9,6 @@ const protect=require("../middlewares/auth_middleware");
 
 router.get("/me", protect, usercontroller.getMe); 
 router.put("/update_profile", protect,upload.single("avatar"), usercontroller.updateProfile);
-router.get("/search", protect, usercontroller.searchUsers);
+router.get("/search", protect, usercontroller.searchUsers); 
 
 module.exports = router;
