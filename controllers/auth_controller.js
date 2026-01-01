@@ -53,7 +53,7 @@ async function register(req, res, next) {
   let { username, password } = req.body;
 
   try {
-    // 1️⃣ Check if username already exists
+
     let existuser = await user.findOne({ username });
     if (existuser) {
       return res.status(400).json({
@@ -62,10 +62,10 @@ async function register(req, res, next) {
       });
     }
 
-    // 2️⃣ Generate password hash
+
     let { salt, hash } = genpassword(password);
 
-    // 3️⃣ Generate UNIQUE 6-digit user code
+
     let userCode;
     let isUnique = false;
 
@@ -75,7 +75,7 @@ async function register(req, res, next) {
       if (!codeExists) isUnique = true;
     }
 
-    // 4️⃣ Create new user
+
     let newuser = new user({
       username,
       hash,
@@ -85,17 +85,17 @@ async function register(req, res, next) {
 
     const saveduser = await newuser.save();
 
-    // 5️⃣ Issue JWT
+  
     const jwt = issuejwt(saveduser);
 
-    // 6️⃣ Respond
+ 
     res.status(201).json({
       success: true,
       message: "Registration successful!",
       user: {
         id: saveduser._id,
         username: saveduser.username,
-        userCode: saveduser.userCode // 🔥 IMPORTANT
+        userCode: saveduser.userCode 
       },
       token: jwt.token,
       expires: jwt.expires
@@ -112,7 +112,6 @@ async function register(req, res, next) {
 }
 
 function current_user(req, res) {
-  // Send back user info if JWT is valid
   return res.status(200).json({
     loggedIn: true,
     user: {
