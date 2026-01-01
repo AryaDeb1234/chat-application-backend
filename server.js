@@ -25,7 +25,11 @@ const userRouter = require("./routes/user");
 const statusRouter = require("./routes/status");
 
 
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5000",
+  credentials: true
+}));
+
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -51,10 +55,12 @@ const server = http.createServer(app);
 
 const io = socketio(server, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
+    origin: "http://localhost:5000",
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
+
 
 // Make io available in controllers
 app.use((req, res, next) => { 
