@@ -26,7 +26,10 @@ const statusRouter = require("./routes/status");
 
 
 app.use(cors({
-  origin: "http://localhost:5000",
+  origin: [
+    "http://localhost:5000",
+    "https://talkifyx.vercel.app"
+  ],
   credentials: true
 }));
 
