@@ -96,8 +96,6 @@ const searchContacts = async (req, res) => {
   }
 };
 
-
-
 module.exports = {
   getMe,
   updateProfile,
