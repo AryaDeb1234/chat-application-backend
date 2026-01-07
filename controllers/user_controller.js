@@ -78,13 +78,11 @@ const searchContacts = async (req, res) => {
     if (!q) {
       return res.status(400).json({ message: "Search query missing" });
     }
-
     
     const user = await User.findById(req.user._id).select("contacts");
 
-    
     const contacts = await User.find({
-      _id: { $in: user.contacts },
+      _id: { $in: user.contacts }, 
       username: { $regex: q, $options: "i" }
     }).select("username avatar");
 
