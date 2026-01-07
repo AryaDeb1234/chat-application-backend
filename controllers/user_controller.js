@@ -21,8 +21,8 @@ const updateProfile = async (req, res) => {
     if (req.file) {
       const result = await uploadcloudinary(req.file.path);
       user.avatar = result.secure_url;
-    }
-
+    }              
+    
     user.username = username || user.username;
     user.phone = phone || user.phone;
     user.bio = bio || user.bio;
@@ -39,8 +39,6 @@ const updateProfile = async (req, res) => {
     res.status(500).json({ success: false });
   }
 };
-
-
 
 const searchUsers = async (req, res) => {
   try {
@@ -73,10 +71,38 @@ const searchUsers = async (req, res) => {
   }
 };
 
+const searchContacts = async (req, res) => {
+  try {
+    const { q } = req.query;
+
+    if (!q) {
+      return res.status(400).json({ message: "Search query missing" });
+    }
+
+    
+    const user = await User.findById(req.user._id).select("contacts");
+
+    
+    const contacts = await User.find({
+      _id: { $in: user.contacts },
+      username: { $regex: q, $options: "i" }
+    }).select("username avatar");
+
+    return res.status(200).json(contacts);
+
+  } catch (err) {
+    return res.status(500).json({
+      message: "Contact search failed",
+      error: err.message
+    });
+  }
+};
+
 
 
 module.exports = {
   getMe,
   updateProfile,
-  searchUsers
+  searchUsers,
+  searchContacts
 };
