@@ -1,47 +1,11 @@
-<!-- <!DOCTYPE html>
-<html>
-<head>
-  <title>Socket Test</title>
-  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-</head>
-<body>
-  <h2>Socket.io Test</h2>
-
-  <button onclick="connectUser()">Connect User</button>
-  <button onclick="joinChat()">Join Chat</button>
-
-  <script>
-    const socket = io("http://localhost:5000");
-
-    function connectUser() {
-  const userId = prompt("Enter your user ID:");
-  socket.emit("setup", userId);
-  console.log("setup emitted for user:", userId);
-}
-
-function joinChat() {
-  const chatId = prompt("Enter chat ID to join:");
-  socket.emit("join chat", chatId);
-  console.log("join chat emitted for chat:", chatId);
-}
-
-
-    socket.on("connected", () => {
-      console.log("Socket connected to server");
-    });
-
-    socket.on("message received", (msg) => {
-      console.log("New message:", msg);
-    });
-  </script>
-</body>
-</html> -->
 <!DOCTYPE html>
 <html>
+
 <head>
   <title>Socket.io Test</title>
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 </head>
+
 <body>
   <h2>Socket.io Chat Test</h2>
 
@@ -56,18 +20,28 @@ function joinChat() {
   <div id="messages"></div>
 
   <script>
-    const socket = io("https://chat-application-backend-nhj9.onrender.com", {
-  transports: ["websocket"],
-});
+    //     const socket = io("https://chat-application-backend-nhj9.onrender.com", {
+    //   transports: ["websocket"],
+    // });
+
+    const socket = io("http://localhost:5000");
 
     let currentUserId;
     let currentChatId;
+    let heartbeatInterval;
 
     // Connect user
     function connectUser() {
       currentUserId = prompt("Enter your user ID:");
       socket.emit("setup", currentUserId);
       console.log("setup emitted for user:", currentUserId);
+
+      if (heartbeatInterval) clearInterval(heartbeatInterval);
+
+      heartbeatInterval = setInterval(() => {
+        socket.emit("heartbeat", currentUserId);
+      }, 30000);
+
     }
 
     // Join chat
@@ -92,6 +66,8 @@ function joinChat() {
       socket.emit("stop typing", currentChatId);
     }
 
+
+
     // Typing indicator
     const input = document.getElementById("messageInput");
     let typingTimer;
@@ -106,9 +82,18 @@ function joinChat() {
 
     // Socket events
     socket.on("connected", () => console.log("Socket connected to server"));
-    socket.on("message received", (msg) => appendMessage(msg.sender.username + ": " + msg.content));
+
+    socket.on("recent messages", (messages) => {
+      document.getElementById("messages").innerHTML = ""; // clear old chat
+
+      messages.forEach((msg) => {
+        appendMessage(msg.sender._id + ": " + msg.content);
+      });
+    });
     socket.on("typing", () => document.getElementById("typingStatus").innerText = "Someone is typing...");
+
     socket.on("stop typing", () => document.getElementById("typingStatus").innerText = "");
+
     socket.on("online users", (users) => console.log("Online users:", users));
 
     function appendMessage(text) {
@@ -118,4 +103,5 @@ function joinChat() {
     }
   </script>
 </body>
+
 </html>

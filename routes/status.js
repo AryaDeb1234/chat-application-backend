@@ -11,5 +11,7 @@ router.post("/upload",protect,upload.single("media"),statuscontroller.uploadStat
 router.get("/fetch",protect,statuscontroller.getStatuses);
 router.post("/view/:statusId", protect, statuscontroller.markStatusViewed);
 router.get("/viewers/:statusId", protect, statuscontroller.getStatusViewers);
+router.get("/isonline/:userId", statuscontroller.isonline);
+
 
 module.exports = router;

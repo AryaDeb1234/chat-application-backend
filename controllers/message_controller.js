@@ -22,9 +22,6 @@ const sendMessage = async (req, res) => {
   path: "chat",
   populate: { path: "users", select: "username avatar _id" }
 });
-
-
-
     
     await Chat.findByIdAndUpdate(chatId, {
       latestMessage: message._id

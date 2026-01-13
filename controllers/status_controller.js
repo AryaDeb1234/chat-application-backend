@@ -1,6 +1,8 @@
 const Status = require("../models/status");
 const { uploadcloudinary } = require("../utlis/cloudinary");
 const User=require("../models/user")
+const redis = require("../config/redis");
+
 
 const uploadStatus = async (req, res) => {
   try {
@@ -118,6 +120,32 @@ const getStatusViewers = async (req, res) => {
   }
 };
 
+const isonline = async (req, res) => {
+  try {
+    const { userId } = req.params;
 
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required",
+      });
+    }
 
-module.exports = { uploadStatus, getStatuses,markStatusViewed,getStatusViewers };
+    const socketId = await redis.get(`user:${userId}:online`);
+
+    return res.status(200).json({
+      success: true,
+      userId,
+      online: !!socketId,
+    });
+
+  } catch (error) {
+    console.error("Redis online check error:", error);
+    return res.status(500).json({ 
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+module.exports = {isonline, uploadStatus, getStatuses,markStatusViewed,getStatusViewers };
