@@ -1,13 +1,21 @@
 const Redis = require("ioredis");
 
-// Prioritize the full REDIS_URL string from your .env
-const redis = new Redis(process.env.REDIS_URL || {
-  host: process.env.REDIS_HOST || "127.0.0.1",
-  port: process.env.REDIS_PORT || 6379,
-  password: process.env.REDIS_PASSWORD || undefined,
-});
+const redisOptions = process.env.REDIS_URL 
+  ? process.env.REDIS_URL 
+  : {
+      host: process.env.REDIS_HOST || "127.0.0.1",
+      port: process.env.REDIS_PORT || 6379,
+      password: process.env.REDIS_PASSWORD,
+    };
 
-redis.on("connect", () => console.log("Redis connected"));
-redis.on("error", (err) => console.log("Redis Error:", err));
+const redis = new Redis(redisOptions);
+
+// Use 'ready' instead of 'connect' to ensure Redis is actually usable
+redis.on("ready", () => console.log("✅ Redis is ready"));
+
+redis.on("error", (err) => {
+  // Only log the message to keep your console clean
+  console.error("❌ Redis Error:", err.message);
+});
 
 module.exports = redis;
